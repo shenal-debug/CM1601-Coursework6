@@ -5,6 +5,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import lk.cm1601.malabe_spare_system.filehandler.AuditLogHandler;
 import lk.cm1601.malabe_spare_system.filehandler.InventoryFileHandler;
 import lk.cm1601.malabe_spare_system.model.Part;
 
@@ -139,6 +140,55 @@ public class DashboardController {
                 "Rs. " + String.format("%.2f", totalValue)
         );
 
+    }
+
+    @FXML
+    private void handleAddPart() {
+
+        if (txtPartCode.getText().isEmpty() ||
+                txtPartName.getText().isEmpty() ||
+                txtBrand.getText().isEmpty() ||
+                txtPrice.getText().isEmpty() ||
+                txtQuantity.getText().isEmpty() ||
+                cmbCategory.getValue() == null ||
+                txtDate.getText().isEmpty()) {
+
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Validation Error");
+            alert.setHeaderText(null);
+            alert.setContentText("Please fill all fields.");
+            alert.showAndWait();
+            return;
+        }
+
+        Part part = new Part(
+                txtPartCode.getText(),
+                txtPartName.getText(),
+                txtBrand.getText(),
+                Double.parseDouble(txtPrice.getText()),
+                Integer.parseInt(txtQuantity.getText()),
+                cmbCategory.getValue(),
+                txtDate.getText(),
+                ""
+        );
+
+        InventoryFileHandler fileHandler = new InventoryFileHandler();
+        fileHandler.savePart(part);
+
+        AuditLogHandler auditLogHandler = new AuditLogHandler();
+
+        auditLogHandler.writeLog(
+                "ADD PART",
+                part.getPartCode() + " - " + part.getPartName()
+        );
+
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Success");
+        alert.setHeaderText(null);
+        alert.setContentText("Part object created successfully.");
+        alert.showAndWait();
+
+        updateInventorySummary();
     }
 
     @FXML
