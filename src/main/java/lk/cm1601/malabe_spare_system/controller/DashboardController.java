@@ -243,4 +243,96 @@ public class DashboardController {
 
     }
 
+    @FXML
+    private void handleUpdate() {
+
+        if (txtPartCode.getText().isEmpty()) {
+
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Update");
+            alert.setHeaderText(null);
+            alert.setContentText("Please enter a Part Code.");
+            alert.showAndWait();
+            return;
+
+        }
+
+        Part selectedPart = tableParts.getSelectionModel().getSelectedItem();
+
+        if (selectedPart == null) {
+
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Update");
+            alert.setHeaderText(null);
+            alert.setContentText("Please select a part from the table.");
+            alert.showAndWait();
+            return;
+
+        }
+
+        String partName = txtPartName.getText().trim().isEmpty()
+                ? selectedPart.getPartName()
+                : txtPartName.getText();
+
+        String brand = txtBrand.getText().trim().isEmpty()
+                ? selectedPart.getBrand()
+                : txtBrand.getText();
+
+        double price = txtPrice.getText().trim().isEmpty()
+                ? selectedPart.getPrice()
+                : Double.parseDouble(txtPrice.getText());
+
+        int quantity = txtQuantity.getText().trim().isEmpty()
+                ? selectedPart.getQuantity()
+                : Integer.parseInt(txtQuantity.getText());
+
+        String category = cmbCategory.getValue() == null
+                ? selectedPart.getCategory()
+                : cmbCategory.getValue();
+
+        String date = txtDate.getText().trim().isEmpty()
+                ? selectedPart.getDate()
+                : txtDate.getText();
+
+        Part updatedPart = new Part(
+
+                selectedPart.getPartCode(),
+                partName,
+                brand,
+                price,
+                quantity,
+                category,
+                date,
+                selectedPart.getImage()
+
+        );
+
+        InventoryFileHandler fileHandler = new InventoryFileHandler();
+
+        boolean updated = fileHandler.updatePart(updatedPart);
+
+        if (updated) {
+
+            handleViewAll();
+
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Update");
+            alert.setHeaderText(null);
+            alert.setContentText("Part updated successfully.");
+            alert.showAndWait();
+
+        } else {
+
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Update");
+            alert.setHeaderText(null);
+            alert.setContentText("Part not found.");
+            alert.showAndWait();
+
+        }
+
+        updateInventorySummary();
+
+    }
+
 }
