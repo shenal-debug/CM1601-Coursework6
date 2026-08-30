@@ -1,5 +1,7 @@
 package lk.cm1601.malabe_spare_system.controller;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -136,6 +138,21 @@ public class DashboardController {
         lblInventoryValue.setText(
                 "Rs. " + String.format("%.2f", totalValue)
         );
+
+    }
+
+    @FXML
+    private void handleViewAll() {
+
+        InventoryFileHandler fileHandler = new InventoryFileHandler();
+
+        ObservableList<Part> partList = FXCollections.observableArrayList(
+                fileHandler.getAllParts()
+        );
+
+        tableParts.setItems(partList);
+
+        updateInventorySummary();
 
     }
 
