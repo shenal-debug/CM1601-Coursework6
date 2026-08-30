@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 
@@ -59,6 +62,62 @@
         <TextField fx:id="txtDate" layoutX="150" layoutY="345" prefWidth="220" promptText="YYYY/MM/DD" />
 
         <TextField fx:id="txtSearch" layoutX="400" layoutY="105" prefWidth="220" promptText="Search by Code, Name, Brand or Category" />
+
+        <!-- Buttons -->
+        <Button fx:id="btnAdd" layoutX="40" layoutY="410" onAction="#handleAddPart" prefWidth="100" text="Add Part" />
+
+        <Button fx:id="btnUpdate" layoutX="150" layoutY="410" onAction="#handleUpdate" prefWidth="100" text="Update" />
+
+        <Button fx:id="btnDelete" layoutX="260" layoutY="410" onAction="#handleDelete" prefWidth="100" text="Delete" />
+
+        <Button fx:id="btnSearch" layoutX="627.0" layoutY="106.0" onAction="#handleSearch" prefWidth="100" text="Search" />
+
+        <Button fx:id="btnClear" layoutX="370.0" layoutY="410.0" onAction="#handleClear" prefWidth="100" text="Clear" />
+
+        <Button fx:id="btnViewAll" layoutX="483.0" layoutY="410.0" onAction="#handleViewAll" prefWidth="100" text="View All" />
+
+        <Button fx:id="btnLowStock" layoutX="40" layoutY="455" onAction="#handleLowStock" prefWidth="140" text="Low Stock" />
+
+        <Button fx:id="btnDealerSelection" layoutX="200" layoutY="455" onAction="#handleDealerSelection" prefWidth="170" text="Dealer Selection" />
+
+        <Button fx:id="btnPointOfSale" layoutX="390" layoutY="455" onAction="#handlePointOfSale" prefWidth="150" text="Point of Sale" />
+
+        <!-- Inventory Summary -->
+
+        <Label layoutX="600.0" layoutY="410.0" text="Total Parts :" />
+
+        <Label fx:id="lblTotalParts" layoutX="700.0" layoutY="410.0" text="0" />
+
+        <Label layoutX="600.0" layoutY="435.0" text="Total Stock :" />
+
+        <Label fx:id="lblTotalStock" layoutX="700.0" layoutY="435.0" text="0" />
+
+        <Label layoutX="600.0" layoutY="460.0" text="Inventory Value :" />
+
+        <Label fx:id="lblInventoryValue" layoutX="720.0" layoutY="460.0" text="Rs. 0.00" />
+
+        <!-- Table -->
+        <TableView fx:id="tableParts" layoutX="40" layoutY="515" prefHeight="155.0" prefWidth="820">
+
+            <columns>
+
+                <TableColumn fx:id="colCode" prefWidth="110" text="Part Code" />
+
+                <TableColumn fx:id="colName" prefWidth="150" text="Part Name" />
+
+                <TableColumn fx:id="colBrand" prefWidth="110" text="Brand" />
+
+                <TableColumn fx:id="colPrice" prefWidth="90" text="Price" />
+
+                <TableColumn fx:id="colQuantity" prefWidth="90" text="Quantity" />
+
+                <TableColumn fx:id="colCategory" prefWidth="120" text="Category" />
+
+                <TableColumn fx:id="colDate" prefWidth="150" text="Date" />
+
+            </columns>
+
+        </TableView>
 
     </children>
 
