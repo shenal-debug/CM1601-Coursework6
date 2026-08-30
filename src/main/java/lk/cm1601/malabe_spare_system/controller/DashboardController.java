@@ -11,6 +11,9 @@ import lk.cm1601.malabe_spare_system.filehandler.InventoryFileHandler;
 import lk.cm1601.malabe_spare_system.model.Part;
 import lk.cm1601.malabe_spare_system.filehandler.DealerFileHandler;
 import lk.cm1601.malabe_spare_system.model.Dealer;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
 import java.util.List;
 
@@ -461,6 +464,30 @@ public class DashboardController {
         alert.setHeaderText("Randomly Selected Dealers");
         alert.setContentText(message.toString());
         alert.showAndWait();
+
+    }
+
+    @FXML
+    private void handlePointOfSale() {
+
+        try {
+
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
+                    getClass().getResource("/lk/cm1601/malabe_spare_system/pos-view.fxml"));
+
+            javafx.stage.Stage stage = new javafx.stage.Stage();
+
+            stage.setTitle("Point Of Sale");
+
+            stage.setScene(new javafx.scene.Scene(loader.load()));
+
+            stage.show();
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+        }
 
     }
 
