@@ -57,4 +57,24 @@ public class DealerFileHandler {
 
     }
 
+    public List<Dealer> getRandomDealers() {
+
+        List<Dealer> allDealers = getAllDealers();
+
+        List<Dealer> selectedDealers = new ArrayList<>();
+
+        while (selectedDealers.size() < 4 && allDealers.size() > 0) {
+
+            int randomIndex = (int) (Math.random() * allDealers.size());
+
+            selectedDealers.add(allDealers.get(randomIndex));
+
+            allDealers.remove(randomIndex);
+
+        }
+
+        return selectedDealers;
+
+    }
+
 }
