@@ -271,4 +271,53 @@ public class InventoryFileHandler {
 
     }
 
+    public void savePart(Part part) {
+
+        try {
+
+            FileWriter writer = new FileWriter(
+                    "src/main/resources/data/inventory_legacy.txt", true);
+
+            writer.write(
+                    part.getPartCode() + "," +
+                            part.getPartName() + "," +
+                            part.getBrand() + "," +
+                            part.getPrice() + "," +
+                            part.getQuantity() + "," +
+                            part.getCategory() + "," +
+                            part.getDate() + "," +
+                            part.getImage() +
+                            System.lineSeparator()
+            );
+
+            writer.close();
+
+        } catch (IOException e) {
+
+            System.out.println("Unable to save part.");
+
+        }
+
+    }
+
+    public List<Part> getLowStockParts() {
+
+        List<Part> lowStockList = new ArrayList<>();
+
+        List<Part> allParts = getAllParts();
+
+        for (Part part : allParts) {
+
+            if (part.getQuantity() < 10) {
+
+                lowStockList.add(part);
+
+            }
+
+        }
+
+        return lowStockList;
+
+    }
+
 }
