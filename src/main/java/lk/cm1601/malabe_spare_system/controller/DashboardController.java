@@ -1,5 +1,6 @@
 package lk.cm1601.malabe_spare_system.controller;
 
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -8,6 +9,8 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import lk.cm1601.malabe_spare_system.filehandler.AuditLogHandler;
 import lk.cm1601.malabe_spare_system.filehandler.InventoryFileHandler;
 import lk.cm1601.malabe_spare_system.model.Part;
+import lk.cm1601.malabe_spare_system.filehandler.DealerFileHandler;
+import lk.cm1601.malabe_spare_system.model.Dealer;
 
 import java.util.List;
 
@@ -411,6 +414,53 @@ public class DashboardController {
         cmbCategory.getSelectionModel().clearSelection();
 
         tableParts.getSelectionModel().clearSelection();
+
+    }
+
+    @FXML
+    private void handleLowStock() {
+
+        InventoryFileHandler fileHandler = new InventoryFileHandler();
+
+        ObservableList<Part> lowStockList = FXCollections.observableArrayList(
+                fileHandler.getLowStockParts()
+        );
+
+        tableParts.setItems(lowStockList);
+
+    }
+
+    @FXML
+    private void handleDealerSelection() {
+
+        lk.cm1601.malabe_spare_system.filehandler.DealerFileHandler dealerFileHandler =
+                new lk.cm1601.malabe_spare_system.filehandler.DealerFileHandler();
+
+        List<lk.cm1601.malabe_spare_system.model.Dealer> selectedDealers =
+                dealerFileHandler.sortDealersByLocation(
+                        dealerFileHandler.getRandomDealers()
+                );
+
+        StringBuilder message = new StringBuilder();
+
+        for (lk.cm1601.malabe_spare_system.model.Dealer dealer : selectedDealers) {
+
+            message.append(dealer.getDealerID())
+                    .append(" - ")
+                    .append(dealer.getDealerName())
+                    .append(" - ")
+                    .append(dealer.getPhone())
+                    .append(" - ")
+                    .append(dealer.getLocation())
+                    .append("\n");
+
+        }
+
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Selected Dealers");
+        alert.setHeaderText("Randomly Selected Dealers");
+        alert.setContentText(message.toString());
+        alert.showAndWait();
 
     }
 
