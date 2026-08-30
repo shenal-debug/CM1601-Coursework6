@@ -4,6 +4,7 @@ import lk.cm1601.malabe_spare_system.model.Part;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -152,6 +153,64 @@ public class InventoryFileHandler {
         }
 
         return results;
+
+    }
+
+    public boolean updatePart(Part updatedPart) {
+
+        List<Part> partList = getAllParts();
+
+        boolean updated = false;
+
+        for (int i = 0; i < partList.size(); i++) {
+
+            if (partList.get(i).getPartCode()
+                    .equalsIgnoreCase(updatedPart.getPartCode())) {
+
+                partList.set(i, updatedPart);
+                updated = true;
+                break;
+
+            }
+
+        }
+
+        if (!updated) {
+
+            return false;
+
+        }
+
+        try {
+
+            FileWriter writer = new FileWriter(
+                    "src/main/resources/data/inventory_legacy.txt");
+
+            for (Part part : partList) {
+
+                writer.write(
+                        part.getPartCode() + "," +
+                                part.getPartName() + "," +
+                                part.getBrand() + "," +
+                                part.getPrice() + "," +
+                                part.getQuantity() + "," +
+                                part.getCategory() + "," +
+                                part.getDate() + "," +
+                                part.getImage() +
+                                System.lineSeparator()
+                );
+
+            }
+
+            writer.close();
+
+        } catch (IOException e) {
+
+            return false;
+
+        }
+
+        return true;
 
     }
 
