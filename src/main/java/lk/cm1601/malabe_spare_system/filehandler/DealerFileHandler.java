@@ -77,4 +77,27 @@ public class DealerFileHandler {
 
     }
 
+    public List<Dealer> sortDealersByLocation(List<Dealer> dealerList) {
+
+        for (int i = 0; i < dealerList.size() - 1; i++) {
+
+            for (int j = 0; j < dealerList.size() - i - 1; j++) {
+
+                if (dealerList.get(j).getLocation()
+                        .compareToIgnoreCase(dealerList.get(j + 1).getLocation()) > 0) {
+
+                    Dealer temp = dealerList.get(j);
+                    dealerList.set(j, dealerList.get(j + 1));
+                    dealerList.set(j + 1, temp);
+
+                }
+
+            }
+
+        }
+
+        return dealerList;
+
+    }
+
 }
