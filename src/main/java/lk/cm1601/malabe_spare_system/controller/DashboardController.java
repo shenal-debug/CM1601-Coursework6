@@ -335,4 +335,67 @@ public class DashboardController {
 
     }
 
+    @FXML
+    private void handleDelete() {
+
+        Part selectedPart = tableParts.getSelectionModel().getSelectedItem();
+
+        if (selectedPart == null) {
+
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Delete");
+            alert.setHeaderText(null);
+            alert.setContentText("Please select a part from the table.");
+            alert.showAndWait();
+            return;
+
+        }
+
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Delete");
+        confirm.setHeaderText(null);
+        confirm.setContentText("Are you sure you want to delete this part?");
+
+        if (confirm.showAndWait().get() == ButtonType.OK) {
+
+            InventoryFileHandler fileHandler = new InventoryFileHandler();
+
+            boolean deleted = fileHandler.deletePart(selectedPart.getPartCode());
+
+            if (deleted) {
+
+                AuditLogHandler auditLogHandler = new AuditLogHandler();
+
+                auditLogHandler.writeLog(
+                        "DELETE PART",
+                        selectedPart.getPartCode() + " - " + selectedPart.getPartName()
+                );
+
+            }
+
+            if (deleted) {
+
+                handleViewAll();
+
+                Alert success = new Alert(Alert.AlertType.INFORMATION);
+                success.setTitle("Delete");
+                success.setHeaderText(null);
+                success.setContentText("Part deleted successfully.");
+                success.showAndWait();
+
+            } else {
+
+                Alert error = new Alert(Alert.AlertType.ERROR);
+                error.setTitle("Delete");
+                error.setHeaderText(null);
+                error.setContentText("Unable to delete part.");
+                error.showAndWait();
+
+            }
+
+        }
+
+        updateInventorySummary();
+    }
+
 }
