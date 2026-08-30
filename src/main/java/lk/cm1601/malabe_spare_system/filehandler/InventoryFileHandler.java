@@ -214,4 +214,61 @@ public class InventoryFileHandler {
 
     }
 
+    public boolean deletePart(String partCode) {
+
+        List<Part> partList = getAllParts();
+
+        boolean deleted = false;
+
+        for (int i = 0; i < partList.size(); i++) {
+
+            if (partList.get(i).getPartCode().equalsIgnoreCase(partCode)) {
+
+                partList.remove(i);
+                deleted = true;
+                break;
+
+            }
+
+        }
+
+        if (!deleted) {
+
+            return false;
+
+        }
+
+        try {
+
+            FileWriter writer = new FileWriter(
+                    "src/main/resources/data/inventory_legacy.txt");
+
+            for (Part part : partList) {
+
+                writer.write(
+                        part.getPartCode() + "," +
+                                part.getPartName() + "," +
+                                part.getBrand() + "," +
+                                part.getPrice() + "," +
+                                part.getQuantity() + "," +
+                                part.getCategory() + "," +
+                                part.getDate() + "," +
+                                part.getImage() +
+                                System.lineSeparator()
+                );
+
+            }
+
+            writer.close();
+
+        } catch (IOException e) {
+
+            return false;
+
+        }
+
+        return true;
+
+    }
+
 }
