@@ -82,6 +82,11 @@ public class PosController {
 
     private boolean synergyDiscountApplied = false;
 
+    // Kept from the last recalculateCartTotal() call so the checkout
+    // receipt can show a full breakdown (gross -> after bulk -> after synergy).
+    private double lastGrossTotal = 0;
+    private double lastItemTotal = 0;
+
     @FXML
     public void initialize() {
 
@@ -142,8 +147,15 @@ public class PosController {
 
     }
 
+    // Sums up the cart at 3 levels: gross (no discounts), after the
+    // per-item 5% bulk discount, and finally after the 10% synergy
+    // discount (only if the cart has both an Engine and an Electrical
+    // part). All three are kept so the checkout receipt can show a
+    // full breakdown.
+
     private double recalculateCartTotal() {
 
+        double grossTotal = 0;
         double itemTotal = 0;
 
         boolean hasEngine = false;
@@ -151,6 +163,7 @@ public class PosController {
 
         for (CartItem item : cartList) {
 
+            grossTotal += item.getPrice() * item.getQuantity();
             itemTotal += item.getSubtotal();
 
             if (item.getCategory().equalsIgnoreCase(SYNERGY_CATEGORY_1)) {
@@ -186,6 +199,9 @@ public class PosController {
         }
 
         lblCartTotal.setText("Rs. " + String.format("%.2f", finalTotal));
+
+        lastGrossTotal = grossTotal;
+        lastItemTotal = itemTotal;
 
         return finalTotal;
 
@@ -302,11 +318,6 @@ public class PosController {
 
     }
 
-    // Finalizes the sale: deducts each cart item's quantity from the
-    // inventory file, writes an audit log line per item plus a summary
-    // line, shows the receipt total, then resets the screen for the
-    // next sale.
-
     @FXML
     private void handleCheckout() {
 
@@ -319,6 +330,9 @@ public class PosController {
         }
 
         double finalTotal = recalculateCartTotal();
+
+        double bulkDiscountAmount = lastGrossTotal - lastItemTotal;
+        double synergyDiscountAmount = lastItemTotal - finalTotal;
 
         InventoryFileHandler fileHandler = new InventoryFileHandler();
         AuditLogHandler auditLogHandler = new AuditLogHandler();
@@ -358,20 +372,38 @@ public class PosController {
 
         }
 
-        String synergyNote = synergyDiscountApplied
-                ? " (10% Synergy Discount Applied)"
-                : "";
+        StringBuilder receipt = new StringBuilder();
+
+        receipt.append("Subtotal: Rs. ").append(String.format("%.2f", lastGrossTotal)).append("\n");
+
+        if (bulkDiscountAmount > 0) {
+
+            receipt.append("Bulk Discount (5% on 3+ units): - Rs. ")
+                    .append(String.format("%.2f", bulkDiscountAmount)).append("\n");
+
+        }
+
+        if (synergyDiscountApplied) {
+
+            receipt.append("Synergy Discount (10% - Engine + Electrical): - Rs. ")
+                    .append(String.format("%.2f", synergyDiscountAmount)).append("\n");
+
+        }
+
+        receipt.append("\nTotal Amount: Rs. ").append(String.format("%.2f", finalTotal));
 
         auditLogHandler.writeLog(
                 "CHECKOUT SUMMARY",
                 "Items: " + cartList.size() +
-                        " - Total: Rs. " + String.format("%.2f", finalTotal) + synergyNote
+                        " - Bulk Discount: Rs. " + String.format("%.2f", bulkDiscountAmount) +
+                        " - Synergy Discount: Rs. " + String.format("%.2f", synergyDiscountApplied ? synergyDiscountAmount : 0) +
+                        " - Total: Rs. " + String.format("%.2f", finalTotal)
         );
 
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Checkout");
         alert.setHeaderText("Purchase Successful");
-        alert.setContentText("Total Amount: Rs. " + String.format("%.2f", finalTotal) + synergyNote);
+        alert.setContentText(receipt.toString());
         alert.showAndWait();
 
         tableInventory.setItems(
