@@ -3,12 +3,14 @@ package lk.cm1601.malabe_spare_system.controller;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
+import lk.cm1601.malabe_spare_system.filehandler.AuditLogHandler;
 import lk.cm1601.malabe_spare_system.filehandler.InventoryFileHandler;
 import lk.cm1601.malabe_spare_system.model.CartItem;
 import lk.cm1601.malabe_spare_system.model.Part;
@@ -139,7 +141,6 @@ public class PosController {
         }
 
     }
-
 
     private double recalculateCartTotal() {
 
@@ -298,6 +299,99 @@ public class PosController {
 
         lblMessage.setStyle("-fx-text-fill: green;");
         lblMessage.setText("Item removed from cart.");
+
+    }
+
+    // Finalizes the sale: deducts each cart item's quantity from the
+    // inventory file, writes an audit log line per item plus a summary
+    // line, shows the receipt total, then resets the screen for the
+    // next sale.
+
+    @FXML
+    private void handleCheckout() {
+
+        if (cartList.isEmpty()) {
+
+            lblMessage.setStyle("-fx-text-fill: red;");
+            lblMessage.setText("Your cart is empty.");
+            return;
+
+        }
+
+        double finalTotal = recalculateCartTotal();
+
+        InventoryFileHandler fileHandler = new InventoryFileHandler();
+        AuditLogHandler auditLogHandler = new AuditLogHandler();
+
+        for (CartItem item : cartList) {
+
+            Part currentPart = fileHandler.searchPartByCode(item.getPartCode());
+
+            if (currentPart == null) {
+
+                continue;
+
+            }
+
+            int remainingStock = currentPart.getQuantity() - item.getQuantity();
+
+            Part updatedPart = new Part(
+
+                    currentPart.getPartCode(),
+                    currentPart.getPartName(),
+                    currentPart.getBrand(),
+                    currentPart.getPrice(),
+                    remainingStock,
+                    currentPart.getCategory(),
+                    currentPart.getDate(),
+                    currentPart.getImage()
+
+            );
+
+            fileHandler.updatePart(updatedPart);
+
+            auditLogHandler.writeLog(
+                    "CHECKOUT",
+                    item.getPartCode() + " - Qty: " + item.getQuantity() +
+                            " - Subtotal: Rs. " + String.format("%.2f", item.getSubtotal())
+            );
+
+        }
+
+        String synergyNote = synergyDiscountApplied
+                ? " (10% Synergy Discount Applied)"
+                : "";
+
+        auditLogHandler.writeLog(
+                "CHECKOUT SUMMARY",
+                "Items: " + cartList.size() +
+                        " - Total: Rs. " + String.format("%.2f", finalTotal) + synergyNote
+        );
+
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Checkout");
+        alert.setHeaderText("Purchase Successful");
+        alert.setContentText("Total Amount: Rs. " + String.format("%.2f", finalTotal) + synergyNote);
+        alert.showAndWait();
+
+        tableInventory.setItems(
+                FXCollections.observableArrayList(fileHandler.getAllParts())
+        );
+
+        cartList.clear();
+
+        lblCartTotal.setText("Rs. 0.00");
+        lblSynergyStatus.setStyle("-fx-text-fill: gray;");
+        lblSynergyStatus.setText("No synergy discount yet (add an Engine part and an Electrical part for 10% off).");
+
+        lblMessage.setStyle("-fx-text-fill: green;");
+        lblMessage.setText("Checkout complete. Inventory updated.");
+
+        txtQuantity.clear();
+        tableInventory.getSelectionModel().clearSelection();
+        tableCart.getSelectionModel().clearSelection();
+
+        synergyDiscountApplied = false;
 
     }
 
