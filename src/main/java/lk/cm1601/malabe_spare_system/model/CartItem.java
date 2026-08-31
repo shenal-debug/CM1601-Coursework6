@@ -4,14 +4,16 @@ public class CartItem {
 
     private String partCode;
     private String partName;
+    private String category;
     private double price;
     private int quantity;
     private double discountPercentage;
 
-    public CartItem(String partCode, String partName, double price, int quantity) {
+    public CartItem(String partCode, String partName, String category, double price, int quantity) {
 
         this.partCode = partCode;
         this.partName = partName;
+        this.category = category;
         this.price = price;
         this.quantity = quantity;
         this.discountPercentage = 0.0;
@@ -24,6 +26,10 @@ public class CartItem {
 
     public String getPartName() {
         return partName;
+    }
+
+    public String getCategory() {
+        return category;
     }
 
     public double getPrice() {
