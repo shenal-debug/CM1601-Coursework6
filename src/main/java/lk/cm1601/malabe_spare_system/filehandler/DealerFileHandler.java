@@ -30,16 +30,57 @@ public class DealerFileHandler {
 
                 if (data.length >= 4) {
 
+                    String dealerID = data[0].trim();
+                    String dealerName = data[1].trim();
+                    String phone = data[2].trim();
+                    String location = data[3].trim();
+
+                    // Dealer ID and Dealer Name are critical - a record
+                    // missing either of these cannot be used, so it is
+                    // skipped instead of silently stored with blank data.
+
+                    if (dealerID.isEmpty() || dealerName.isEmpty()) {
+
+                        System.out.println(
+                                "Skipping invalid dealer record (missing ID/Name): \"" + line + "\""
+                        );
+
+                        continue;
+
+                    }
+
+                    // Phone number is dirty in the legacy file (some rows have
+                    // it blank, e.g. "D103; Ranatunga Auto; ; Pittugala").
+                    // Instead of storing an empty/invalid phone silently,
+                    // fall back to a visible placeholder so it is obvious
+                    // in the UI that the data is incomplete.
+
+                    if (phone.isEmpty() || !isValidPhone(phone)) {
+
+                        System.out.println(
+                                "Dealer " + dealerID + " has an invalid/missing phone number - using placeholder."
+                        );
+
+                        phone = "N/A";
+
+                    }
+
                     Dealer dealer = new Dealer(
 
-                            data[0].trim(),
-                            data[1].trim(),
-                            data[2].trim(),
-                            data[3].trim()
+                            dealerID,
+                            dealerName,
+                            phone,
+                            location
 
                     );
 
                     dealerList.add(dealer);
+
+                } else {
+
+                    System.out.println(
+                            "Skipping malformed dealer record (missing fields): \"" + line + "\""
+                    );
 
                 }
 
@@ -54,6 +95,31 @@ public class DealerFileHandler {
         }
 
         return dealerList;
+
+    }
+
+    // A valid local phone number is treated as 10 digits (e.g. 0771234567).
+    // This is checked manually, character by character.
+
+    private boolean isValidPhone(String phone) {
+
+        if (phone.length() != 10) {
+
+            return false;
+
+        }
+
+        for (int i = 0; i < phone.length(); i++) {
+
+            if (!Character.isDigit(phone.charAt(i))) {
+
+                return false;
+
+            }
+
+        }
+
+        return true;
 
     }
 
