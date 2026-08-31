@@ -2,22 +2,32 @@ package lk.cm1601.malabe_spare_system.model;
 
 public class CartItem {
 
-    private Part part;
+    private String partCode;
+    private String partName;
+    private double price;
     private int quantity;
-    private double subtotal;
+    private double discountPercentage;
 
-    public CartItem(Part part, int quantity, double subtotal) {
-        this.part = part;
+    public CartItem(String partCode, String partName, double price, int quantity) {
+
+        this.partCode = partCode;
+        this.partName = partName;
+        this.price = price;
         this.quantity = quantity;
-        this.subtotal = subtotal;
+        this.discountPercentage = 0.0;
+
     }
 
-    public Part getPart() {
-        return part;
+    public String getPartCode() {
+        return partCode;
     }
 
-    public void setPart(Part part) {
-        this.part = part;
+    public String getPartName() {
+        return partName;
+    }
+
+    public double getPrice() {
+        return price;
     }
 
     public int getQuantity() {
@@ -28,11 +38,32 @@ public class CartItem {
         this.quantity = quantity;
     }
 
-    public double getSubtotal() {
-        return subtotal;
+    public double getDiscountPercentage() {
+        return discountPercentage;
     }
 
-    public void setSubtotal(double subtotal) {
-        this.subtotal = subtotal;
+    public void setDiscountPercentage(double discountPercentage) {
+        this.discountPercentage = discountPercentage;
     }
+
+    public String getDiscountLabel() {
+
+        if (discountPercentage > 0) {
+
+            return (int) discountPercentage + "%";
+
+        }
+
+        return "-";
+
+    }
+
+    public double getSubtotal() {
+
+        double rawTotal = price * quantity;
+
+        return rawTotal - (rawTotal * discountPercentage / 100.0);
+
+    }
+
 }
