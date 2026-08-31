@@ -11,9 +11,9 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="650.0" prefWidth="750.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lk.cm1601.malabe_spare_system.controller.PosController">
+<AnchorPane prefHeight="740.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lk.cm1601.malabe_spare_system.controller.PosController">
     <children>
-        <VBox layoutX="20.0" layoutY="20.0" spacing="12.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0" AnchorPane.bottomAnchor="20.0">
+        <VBox layoutX="20.0" layoutY="20.0" spacing="10.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0" AnchorPane.bottomAnchor="20.0">
             <children>
                 <Label text="Point Of Sale">
                     <font>
@@ -21,36 +21,17 @@
                     </font>
                 </Label>
 
-                <HBox alignment="CENTER_LEFT" spacing="10.0">
-                    <children>
-                        <Label text="Part Code:" />
-                        <TextField fx:id="txtSearchCode" promptText="e.g. P001" prefWidth="150.0" />
-                        <Button onAction="#handleSearchPart" text="Search" />
-                    </children>
-                </HBox>
+                <Label text="Available Parts (click a row to select)" />
 
-                <VBox spacing="8.0" style="-fx-border-color: #cccccc; -fx-border-radius: 5; -fx-padding: 10;">
-                    <children>
-                        <HBox spacing="10.0">
-                            <children>
-                                <Label prefWidth="120.0" text="Part Name:" />
-                                <Label fx:id="lblPartName" text="-" />
-                            </children>
-                        </HBox>
-                        <HBox spacing="10.0">
-                            <children>
-                                <Label prefWidth="120.0" text="Price:" />
-                                <Label fx:id="lblPrice" text="-" />
-                            </children>
-                        </HBox>
-                        <HBox spacing="10.0">
-                            <children>
-                                <Label prefWidth="120.0" text="Available Stock:" />
-                                <Label fx:id="lblStock" text="-" />
-                            </children>
-                        </HBox>
-                    </children>
-                </VBox>
+                <TableView fx:id="tableInventory" prefHeight="220.0">
+                    <columns>
+                        <TableColumn fx:id="colCode" prefWidth="80.0" text="Code" />
+                        <TableColumn fx:id="colName" prefWidth="200.0" text="Name" />
+                        <TableColumn fx:id="colPrice" prefWidth="90.0" text="Price" />
+                        <TableColumn fx:id="colQuantity" prefWidth="80.0" text="Stock" />
+                        <TableColumn fx:id="colCategory" prefWidth="130.0" text="Category" />
+                    </columns>
+                </TableView>
 
                 <HBox alignment="CENTER_LEFT" spacing="10.0">
                     <children>
@@ -68,13 +49,14 @@
                     </font>
                 </Label>
 
-                <TableView fx:id="tableCart" prefHeight="220.0">
+                <TableView fx:id="tableCart" prefHeight="180.0">
                     <columns>
-                        <TableColumn fx:id="colCartCode" prefWidth="80.0" text="Code" />
-                        <TableColumn fx:id="colCartName" prefWidth="160.0" text="Name" />
-                        <TableColumn fx:id="colCartPrice" prefWidth="90.0" text="Price" />
-                        <TableColumn fx:id="colCartQty" prefWidth="80.0" text="Quantity" />
-                        <TableColumn fx:id="colCartDiscount" prefWidth="80.0" text="Discount" />
+                        <TableColumn fx:id="colCartCode" prefWidth="70.0" text="Code" />
+                        <TableColumn fx:id="colCartName" prefWidth="150.0" text="Name" />
+                        <TableColumn fx:id="colCartPrice" prefWidth="80.0" text="Price" />
+                        <TableColumn fx:id="colCartQty" prefWidth="70.0" text="Quantity" />
+                        <TableColumn fx:id="colCartCategory" prefWidth="90.0" text="Category" />
+                        <TableColumn fx:id="colCartDiscount" prefWidth="70.0" text="Discount" />
                         <TableColumn fx:id="colCartSubtotal" prefWidth="100.0" text="Subtotal" />
                     </columns>
                 </TableView>
@@ -90,6 +72,8 @@
                         </Label>
                     </children>
                 </HBox>
+
+                <Label fx:id="lblSynergyStatus" style="-fx-text-fill: gray;" wrapText="true" />
 
                 <Button onAction="#handleClosePos" text="Close" />
             </children>
