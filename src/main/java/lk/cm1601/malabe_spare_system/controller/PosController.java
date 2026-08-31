@@ -18,26 +18,39 @@ public class PosController {
     private static final int BULK_DISCOUNT_MIN_QTY = 3;
     private static final double BULK_DISCOUNT_RATE = 5.0;
 
+    private static final double SYNERGY_DISCOUNT_RATE = 10.0;
+    private static final String SYNERGY_CATEGORY_1 = "Engine";
+    private static final String SYNERGY_CATEGORY_2 = "Electrical";
+
     @FXML
-    private TextField txtSearchCode;
+    private TableView<Part> tableInventory;
+
+    @FXML
+    private TableColumn<Part, String> colCode;
+
+    @FXML
+    private TableColumn<Part, String> colName;
+
+    @FXML
+    private TableColumn<Part, Double> colPrice;
+
+    @FXML
+    private TableColumn<Part, Integer> colQuantity;
+
+    @FXML
+    private TableColumn<Part, String> colCategory;
 
     @FXML
     private TextField txtQuantity;
-
-    @FXML
-    private Label lblPartName;
-
-    @FXML
-    private Label lblPrice;
-
-    @FXML
-    private Label lblStock;
 
     @FXML
     private Label lblMessage;
 
     @FXML
     private Label lblCartTotal;
+
+    @FXML
+    private Label lblSynergyStatus;
 
     @FXML
     private TableView<CartItem> tableCart;
@@ -55,6 +68,9 @@ public class PosController {
     private TableColumn<CartItem, Integer> colCartQty;
 
     @FXML
+    private TableColumn<CartItem, String> colCartCategory;
+
+    @FXML
     private TableColumn<CartItem, String> colCartDiscount;
 
     @FXML
@@ -62,66 +78,35 @@ public class PosController {
 
     private final ObservableList<CartItem> cartList = FXCollections.observableArrayList();
 
-    // Holds the part that was found by the last successful search, so
-    // "Add to Cart" knows which part to work with.
-    private Part currentPart;
+    private boolean synergyDiscountApplied = false;
 
     @FXML
     public void initialize() {
+
+        colCode.setCellValueFactory(new PropertyValueFactory<>("partCode"));
+        colName.setCellValueFactory(new PropertyValueFactory<>("partName"));
+        colPrice.setCellValueFactory(new PropertyValueFactory<>("price"));
+        colQuantity.setCellValueFactory(new PropertyValueFactory<>("quantity"));
+        colCategory.setCellValueFactory(new PropertyValueFactory<>("category"));
+
+        InventoryFileHandler fileHandler = new InventoryFileHandler();
+
+        ObservableList<Part> partList =
+                FXCollections.observableArrayList(fileHandler.getAllParts());
+
+        tableInventory.setItems(partList);
 
         colCartCode.setCellValueFactory(new PropertyValueFactory<>("partCode"));
         colCartName.setCellValueFactory(new PropertyValueFactory<>("partName"));
         colCartPrice.setCellValueFactory(new PropertyValueFactory<>("price"));
         colCartQty.setCellValueFactory(new PropertyValueFactory<>("quantity"));
+        colCartCategory.setCellValueFactory(new PropertyValueFactory<>("category"));
         colCartDiscount.setCellValueFactory(new PropertyValueFactory<>("discountLabel"));
         colCartSubtotal.setCellValueFactory(new PropertyValueFactory<>("subtotal"));
 
         tableCart.setItems(cartList);
 
-    }
-
-    @FXML
-    private void handleSearchPart() {
-
-        String code = txtSearchCode.getText().trim();
-
-        if (code.isEmpty()) {
-
-            lblMessage.setText("Please enter a Part Code to search.");
-            currentPart = null;
-            clearPartDetails();
-            return;
-
-        }
-
-        InventoryFileHandler fileHandler = new InventoryFileHandler();
-
-        Part part = fileHandler.searchPartByCode(code);
-
-        if (part == null) {
-
-            lblMessage.setText("No part found with code: " + code);
-            currentPart = null;
-            clearPartDetails();
-            return;
-
-        }
-
-        currentPart = part;
-
-        lblPartName.setText(part.getPartName());
-        lblPrice.setText("Rs. " + String.format("%.2f", part.getPrice()));
-        lblStock.setText(String.valueOf(part.getQuantity()));
-
-        lblMessage.setText("");
-
-    }
-
-    private void clearPartDetails() {
-
-        lblPartName.setText("-");
-        lblPrice.setText("-");
-        lblStock.setText("-");
+        lblSynergyStatus.setText("No synergy discount yet (add an Engine part and an Electrical part for 10% off).");
 
     }
 
@@ -155,26 +140,65 @@ public class PosController {
 
     }
 
-    private void recalculateCartTotal() {
 
-        double total = 0;
+    private double recalculateCartTotal() {
+
+        double itemTotal = 0;
+
+        boolean hasEngine = false;
+        boolean hasElectrical = false;
 
         for (CartItem item : cartList) {
 
-            total += item.getSubtotal();
+            itemTotal += item.getSubtotal();
+
+            if (item.getCategory().equalsIgnoreCase(SYNERGY_CATEGORY_1)) {
+
+                hasEngine = true;
+
+            }
+
+            if (item.getCategory().equalsIgnoreCase(SYNERGY_CATEGORY_2)) {
+
+                hasElectrical = true;
+
+            }
 
         }
 
-        lblCartTotal.setText("Rs. " + String.format("%.2f", total));
+        synergyDiscountApplied = hasEngine && hasElectrical;
+
+        double finalTotal = itemTotal;
+
+        if (synergyDiscountApplied) {
+
+            finalTotal = itemTotal * (1 - SYNERGY_DISCOUNT_RATE / 100.0);
+
+            lblSynergyStatus.setStyle("-fx-text-fill: green;");
+            lblSynergyStatus.setText("10% Synergy Discount Applied (cart has Engine + Electrical parts).");
+
+        } else {
+
+            lblSynergyStatus.setStyle("-fx-text-fill: gray;");
+            lblSynergyStatus.setText("No synergy discount yet (add an Engine part and an Electrical part for 10% off).");
+
+        }
+
+        lblCartTotal.setText("Rs. " + String.format("%.2f", finalTotal));
+
+        return finalTotal;
 
     }
 
     @FXML
     private void handleAddToCart() {
 
-        if (currentPart == null) {
+        Part selectedPart = tableInventory.getSelectionModel().getSelectedItem();
 
-            lblMessage.setText("Please search for a valid part first.");
+        if (selectedPart == null) {
+
+            lblMessage.setStyle("-fx-text-fill: red;");
+            lblMessage.setText("Please select a part from the table.");
             return;
 
         }
@@ -183,6 +207,7 @@ public class PosController {
 
         if (qtyText.isEmpty()) {
 
+            lblMessage.setStyle("-fx-text-fill: red;");
             lblMessage.setText("Please enter a quantity.");
             return;
 
@@ -196,6 +221,7 @@ public class PosController {
 
         } catch (NumberFormatException e) {
 
+            lblMessage.setStyle("-fx-text-fill: red;");
             lblMessage.setText("Quantity must be a valid whole number.");
             return;
 
@@ -203,19 +229,21 @@ public class PosController {
 
         if (quantity <= 0) {
 
+            lblMessage.setStyle("-fx-text-fill: red;");
             lblMessage.setText("Quantity must be greater than zero.");
             return;
 
         }
 
-        CartItem existingItem = findCartItem(currentPart.getPartCode());
+        CartItem existingItem = findCartItem(selectedPart.getPartCode());
 
         int alreadyInCart = (existingItem != null) ? existingItem.getQuantity() : 0;
 
-        if (quantity + alreadyInCart > currentPart.getQuantity()) {
+        if (quantity + alreadyInCart > selectedPart.getQuantity()) {
 
+            lblMessage.setStyle("-fx-text-fill: red;");
             lblMessage.setText("Not enough stock available. Only " +
-                    currentPart.getQuantity() + " left in stock.");
+                    selectedPart.getQuantity() + " left in stock.");
             return;
 
         }
@@ -228,9 +256,10 @@ public class PosController {
         } else {
 
             CartItem newItem = new CartItem(
-                    currentPart.getPartCode(),
-                    currentPart.getPartName(),
-                    currentPart.getPrice(),
+                    selectedPart.getPartCode(),
+                    selectedPart.getPartName(),
+                    selectedPart.getCategory(),
+                    selectedPart.getPrice(),
                     quantity
             );
 
@@ -244,7 +273,9 @@ public class PosController {
         recalculateCartTotal();
 
         lblMessage.setStyle("-fx-text-fill: green;");
-        lblMessage.setText(quantity + " x " + currentPart.getPartName() + " added to cart.");
+        lblMessage.setText(quantity + " x " + selectedPart.getPartName() + " added to cart.");
+
+        txtQuantity.clear();
 
     }
 
@@ -273,7 +304,7 @@ public class PosController {
     @FXML
     private void handleClosePos() {
 
-        Stage stage = (Stage) txtSearchCode.getScene().getWindow();
+        Stage stage = (Stage) tableInventory.getScene().getWindow();
         stage.close();
 
     }
