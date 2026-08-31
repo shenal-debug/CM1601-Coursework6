@@ -94,9 +94,21 @@ public class InventoryFileHandler {
 
                     } catch (Exception e) {
 
-                        // Skip invalid records
+                        // Dirty/invalid record - skip it but keep a trace of
+                        // why, instead of silently dropping it with no feedback.
+
+                        System.out.println(
+                                "Skipping invalid inventory record: \"" + line +
+                                        "\" (Reason: " + e.getMessage() + ")"
+                        );
 
                     }
+
+                } else {
+
+                    System.out.println(
+                            "Skipping malformed inventory record (missing fields): \"" + line + "\""
+                    );
 
                 }
 
@@ -129,6 +141,12 @@ public class InventoryFileHandler {
         }
 
         return null;
+
+    }
+
+    public boolean isDuplicatePartCode(String partCode) {
+
+        return searchPartByCode(partCode) != null;
 
     }
 
