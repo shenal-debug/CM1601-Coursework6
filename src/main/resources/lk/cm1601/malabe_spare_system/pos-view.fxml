@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="740.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lk.cm1601.malabe_spare_system.controller.PosController">
+<AnchorPane prefHeight="760.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lk.cm1601.malabe_spare_system.controller.PosController">
     <children>
         <VBox layoutX="20.0" layoutY="20.0" spacing="10.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0" AnchorPane.bottomAnchor="20.0">
             <children>
@@ -64,6 +64,7 @@
                 <HBox alignment="CENTER_LEFT" spacing="15.0">
                     <children>
                         <Button onAction="#handleRemoveFromCart" text="Remove from Cart" />
+                        <Button onAction="#handleCheckout" text="Checkout" style="-fx-font-weight: bold;" />
                         <Label text="Cart Total:" />
                         <Label fx:id="lblCartTotal" text="Rs. 0.00">
                             <font>
